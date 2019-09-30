@@ -247,9 +247,3 @@ Function PrtSpc10Api(pathCmd As String, strOption As String, strPrinterName As S
     
 End Function
 
-
-Private sub ErrorConst()
-
-	
-end sub
-

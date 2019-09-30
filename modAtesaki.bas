@@ -12,17 +12,15 @@ Dim intOptCol(2) As Integer
     
 Public Sub Atesaki_main()
     
-        
     Dim WsOption As Worksheet
     Set WsOption = Worksheets("option")
     
     Dim WsList As Worksheet
-	Set WsOption = Worksheets("List")
-	
-	'封筒宛先作成s
-	Dim WsAtesaki As Worksheet
-	Set WsAtesaki = Worksheets(strWsAtesaki)
-	
+    Set WsList = Worksheets("List")
+    
+    '封筒宛先作成s
+    Dim WsAtesaki As Worksheet
+    Set WsAtesaki = Worksheets(strWsAtesaki)
     
     Dim strExePathName As String        'SPC10のEXEファイルパスを格納
     Dim strTextPathName As String
@@ -39,7 +37,11 @@ Public Sub Atesaki_main()
     '印刷対象範囲格納
     intTarRow(0) = WsOption.Range("D3").Value
     intTarCol(0) = WsOption.Range("D4").Value
-    intTarRow(1) = Cells(intTarRow(0), intTarCol(0)).End(xlDown).Row
+    if WsAtesaki.Cells(intTarRow(0)+ 1, intTarCol(0)) = "" then
+    	intTarRow(1) = 16
+    Else
+    	intTarRow(1) = WsAtesaki.Cells(intTarRow(0), intTarCol(0)).End(xlDown).Row
+    End if
     intTarCol(1) = WsOption.Range("D6").Value
     
     intOptRow(0) = WsOption.Range("D7").Value
@@ -50,6 +52,15 @@ Public Sub Atesaki_main()
     '代入時に増設していくからとりあえず１で宣言
     ReDim strPrintjob(0, intTarCol(1) - intTarCol(0))
     ReDim strPrintOption(0, intOptCol(1) - intOptCol(0))
+    
+    Dim strHalfcut as String
+    Dim strConfirmTapeWidth as String
+    Dim strOptPrintLog as String
+    Dim strOptCol as String
+    strHalfcut = WsAtesaki.Cells(WsOption.Range("D15").Value, WsOption.Range("D16").Value ).Value
+    strConfirmTapeWidth = WsAtesaki.Cells(WsOption.Range("D17").Value, WsOption.Range("D18").Value ).Value
+    strOptPrintLog = WsAtesaki.Cells(WsOption.Range("D19").Value, WsOption.Range("D20").Value ).Value
+    strOptCol = WsAtesaki.Cells(WsOption.Range("D21").Value, WsOption.Range("D22").Value ).Value
     
     '-----------------------------------------------------------------------------
     ' SPC10のEXEファイルをパス付きで指定する
@@ -75,15 +86,15 @@ Public Sub Atesaki_main()
     '-----------------------------------------------------------------------------
     ' ハーフカット設定
     Dim blnHalfcut As Boolean
-    If OptionButton1.Value = True Then
-        blnHalfcut = True
-    ElseIf OptionButton2.Value = True Then
-        blnHalfcut = False
-    End If
-
+	if Flg_Yes = strHalfcut Then
+		blnHalfcut = True
+	Else
+		blnHalfcut = False
+	End if
+    
     ' テープ幅確認メッセージ設定
     Dim blnConfirmTapeWidth As Boolean
-    If chkTapeWidth.Value = True Then
+    if Flg_Yes = strConfirmTapeWidth Then
         blnConfirmTapeWidth = True
     Else
         blnConfirmTapeWidth = False
@@ -91,7 +102,7 @@ Public Sub Atesaki_main()
 
     ' 印刷結果をファイルに出力する設定
     Dim strPrintLog As String
-    If chkPrintLog.Value = True Then
+    if Flg_Yes = strOptPrintLog Then
         strPrintLog = strPrintLogPathName
     Else
         strPrintLog = ""
@@ -243,23 +254,28 @@ Private Function getPrintJobCount(strTapeWidth As String)
     
     Dim strTarDirection As String      'テプラ向き
     
+    '封筒宛先作成
+    Dim WsAtesaki As Worksheet
+    Set WsAtesaki = Worksheets(strWsAtesaki)
+    
     '印刷枚数チェック
     cntRow = 0
     For i = intTarRow(0) To intTarRow(1)
         '印刷対象チェック
-        If Cells(i, intTarCol(0) - 1) = "○" Then
+        If WsAtesaki.Cells(i, intTarCol(0) - 1) = "○" Then
             '枚数チェック
             'ReDim用
             '枚数が空白だったら終了
-            If Cells(i, intOptCol(1)).Value = "" Or IsNumeric(Cells(i, intOptCol(1)).Value) = False Then
+            If WsAtesaki.Cells(i, intOptCol(1)).Value = "" Or _
+               IsNumeric(WsAtesaki.Cells(i, intOptCol(1)).Value) = False Then
                 MsgBox i & " " & ERROR_MESSAGE_Maisu_Nothing
                 End
             End If
-            temp = temp + Cells(i, intOptCol(1)).Value
+            temp = temp + WsAtesaki.Cells(i, intOptCol(1)).Value
             
             '後の繰り返し用
             ReDim Preserve intTarNum(cntRow)
-            intTarNum(cntRow) = Cells(i, intOptCol(1)).Value
+            intTarNum(cntRow) = WsAtesaki.Cells(i, intOptCol(1)).Value
             
             '○の行を記憶
             ReDim Preserve intTempRow(cntRow)
@@ -287,16 +303,16 @@ Private Function getPrintJobCount(strTapeWidth As String)
             cntCol = 0
             For j = intTarCol(0) To intTarCol(1)  '列繰り返し
                 '印刷対象の格納
-                strPrintjob(cntRow, cntCol) = Cells(intTempRow(i), j)
+                strPrintjob(cntRow, cntCol) = WsAtesaki.Cells(intTempRow(i), j)
                 cntCol = cntCol + 1
             Next j
             '対象のテンプレート格納
             '「指定しない」を選択した場合
-            If Cells(intTempRow(i), intOptCol(0)) = "指定しない" Then
+            If WsAtesaki.Cells(intTempRow(i), intOptCol(0)) = "指定しない" Then
                 '「縦」「横」チェック　それ以外はエラー
-                If Cells(intTempRow(i), intOptCol(0) + 1) = "縦" Then
+                If WsAtesaki.Cells(intTempRow(i), intOptCol(0) + 1) = "縦" Then
                     strTarDirection = "_tate"
-                ElseIf Cells(intTempRow(i), intOptCol(0) + 1) = "横" Then
+                ElseIf WsAtesaki.Cells(intTempRow(i), intOptCol(0) + 1) = "横" Then
                     strTarDirection = "_yoko"
                 Else
                     '向きが選択されていない場合は終了
@@ -306,12 +322,12 @@ Private Function getPrintJobCount(strTapeWidth As String)
                 strPrintOption(cntRow, 0) = strTpePath & "atesaki_" & strTapeWidth & strTarDirection & ".tpe"
             'テンプレートを選択している場合
             Else
-                strPrintOption(cntRow, 0) = strTpePath & Cells(intTempRow(i), intOptCol(0))
+                strPrintOption(cntRow, 0) = strTpePath & WsAtesaki.Cells(intTempRow(i), intOptCol(0))
             End If
             'テンプレート存在チェックをしたい
             '指定しないの場合、テンプレートとテプラサイズが違う場合、エラーメッセージ
             If Dir(strPrintOption(cntRow, 0)) = "" Then
-                If Cells(intTempRow(i), intOptCol(0)) = "指定しない" Then
+                If WsAtesaki.Cells(intTempRow(i), intOptCol(0)) = "指定しない" Then
                     MsgBox ERROR_MESSAGE_Default_Template & vbCrLf & vbCrLf & _
                            "本体に搭載されているテープ ： " & strTapeWidth & " mm"
                     End
@@ -330,12 +346,15 @@ Public Sub Atesaki_Template()
     '================================================
     '封筒宛先作成シートのテンプレート入力規則を更新
     '================================================
-
+    
     '変数宣言
     Dim WsOption As Worksheet
     Set WsOption = Worksheets("option")
     Dim WsList As Worksheet
     Set WsList = Worksheets("List")
+    '封筒宛先作成
+    Dim WsAtesaki As Worksheet
+    Set WsAtesaki = Worksheets(strWsAtesaki)
     
     Dim strTempFile() As String         'テンプレートファイル名を格納
     Dim strTempPath As String           'テンプレートのパスを格納

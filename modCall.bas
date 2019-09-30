@@ -6,13 +6,14 @@ Attribute VB_Name =  "modCall"
 
 ' Excel内のオブジェクトに登録する用のマクロ
 
-Private sub CallBihin()
+Public sub CallBihin()
 	
-	Call modBihin.mainBihin
+	Call modBihin.Bihin_main
 
 End sub
 
-Private sub modAtesaki()
+Public sub CallAtesaki()
 	
+	Call modAtesaki.Atesaki_main
 	
 End sub
