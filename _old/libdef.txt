@@ -1,4 +1,10 @@
-.\module\modTepra.bas]
+
 .\module\modAtesaki.bas
+
 .\module\modBihin.bas
+
 .\module\modCall.bas
+
+.\module\modList.bas
+
+.\module\modTepra.bas

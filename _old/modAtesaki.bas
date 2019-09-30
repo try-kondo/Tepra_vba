@@ -1,4 +1,7 @@
 
+' モジュール名の指定
+Attribute VB_Name =  "modAtesaki"
+
 Dim strPrintjob() As String
 Dim strPrintOption() As String
 
@@ -12,6 +15,14 @@ Public Sub Atesaki_main()
         
     Dim WsOption As Worksheet
     Set WsOption = Worksheets("option")
+    
+    Dim WsList As Worksheet
+	Set WsOption = Worksheets("List")
+	
+	'封筒宛先作成s
+	Dim WsAtesaki As Worksheet
+	Set WsAtesaki = Worksheets(strWsAtesaki)
+	
     
     Dim strExePathName As String        'SPC10のEXEファイルパスを格納
     Dim strTextPathName As String

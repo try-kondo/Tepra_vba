@@ -3,10 +3,13 @@
 ' Copyright 2014 KING JIM CO.,LTD.
 '*****************************************************************************
 
+' モジュール名の指定
+Attribute VB_Name =  "modBihin"
+
 '==============================================================================
-' CSVファイルを作成し、印刷実行関数を呼び出す
+' CSVファイルを作成し、印刷実行関数を呼び出すs
 '==============================================================================
-Private Sub cmdPrint_Click()
+Public Sub Bihin_main()
 
     Dim strExePathName As String
     Dim strTextPathName As String
@@ -15,14 +18,33 @@ Private Sub cmdPrint_Click()
     Dim strTpePathName As String
     Dim strOption As String
     Dim dblRetValue As Double
-
+    
     '対象のジョブ
     Dim strPrintjob() As String
     
     Dim strColName As String
     Dim strColDel As String
     
-    MAX_LINE_COUNT = Range("D19").End(xlDown).Row
+    Dim WsOption As Worksheet
+    Set WsOption = Worksheets("option")
+    
+    Dim WsList As Worksheet
+    Set WsList = Worksheets("List")
+    
+    '備品管理台帳
+    Dim WsBihin As Worksheet
+    Set WsBihin = Worksheets(strWsBihin)
+   	
+    MAX_LINE_COUNT = WsBihin.Range("D19").End(xlDown).Row
+    
+    Dim strHalfcut as String
+    Dim strConfirmTapeWidth as String
+    Dim strOptPrintLog as String
+    Dim strOptCol as String
+    strHalfcut = WsBihin.Cells(WsOption.Range("C15").Value, WsOption.Range("C16").Value ).Value
+    strConfirmTapeWidth = WsBihin.Cells(WsOption.Range("C17").Value, WsOption.Range("C18").Value ).Value
+    strOptPrintLog = WsBihin.Cells(WsOption.Range("C19").Value, WsOption.Range("C20").Value ).Value
+    strOptCol = WsBihin.Cells(WsOption.Range("C21").Value, WsOption.Range("C22").Value ).Value
     
     '-----------------------------------------------------------------------------
     ' SPC10のEXEファイルをパス付きで指定する
@@ -50,15 +72,15 @@ Private Sub cmdPrint_Click()
     '-----------------------------------------------------------------------------
     ' ハーフカット設定
     Dim blnHalfcut As Boolean
-    If OptionButton1.Value = True Then
-        blnHalfcut = True
-    ElseIf OptionButton2.Value = True Then
-        blnHalfcut = False
-    End If
-
+	if Flg_Yes = strHalfcut Then
+		blnHalfcut = True
+	Else
+		blnHalfcut = False
+	End if
+    
     ' テープ幅確認メッセージ設定
     Dim blnConfirmTapeWidth As Boolean
-    If chkTapeWidth.Value = True Then
+    if Flg_Yes = strConfirmTapeWidth Then
         blnConfirmTapeWidth = True
     Else
         blnConfirmTapeWidth = False
@@ -66,20 +88,15 @@ Private Sub cmdPrint_Click()
 
     ' 印刷結果をファイルに出力する設定
     Dim strPrintLog As String
-    If chkPrintLog.Value = True Then
+    if Flg_Yes = strOptPrintLog Then
         strPrintLog = strPrintLogPathName
     Else
         strPrintLog = ""
     End If
-
+    
     '-----------------------------------------------------------------------------
     ' 印刷対象の確認
     '-----------------------------------------------------------------------------
-'    If (getPrintJobCount() = 0) Then
-'        MsgBox ERROR_MESSAGE_NO_PRINT_JOB
-'        Exit Sub
-'    End If
-
     strPrintjob() = getPrintJobCount()
     
     '-----------------------------------------------------------------------------
@@ -128,7 +145,8 @@ Private Sub cmdPrint_Click()
     ' TPEファイルを指定
     'カラム印刷有無チェック
     strColDel = ""
-    If chkColDel.Value = True Then
+    'If WsBihin.chkColDel.Value = True Then
+    if Flg_Yes = strOptCol Then
         strColDel = "_col"
     End If
     
@@ -146,17 +164,6 @@ Private Sub cmdPrint_Click()
     '-----------------------------------------------------------------------------
     ' CSVファイルの作成
     '-----------------------------------------------------------------------------
-'    Dim csvStr1        As String
-'    Dim csvStr2        As String
-'    Dim csvStr3        As String
-'    Dim csvStr4        As String
-'    Dim csvQrStr       As String  ' QRコード
-'    Dim csvStrAll      As String  ' 結合用
-'    Dim strCompanyName As String  ' 会社名
-'
-'    Dim i As Integer
-'    Dim chkValue(MAX_LINE_COUNT)
-'    Dim fileNo As Integer
 
     On Error Resume Next
     
@@ -182,40 +189,6 @@ Private Sub cmdPrint_Click()
         Print #fileNo, csvStrAll
     Next i
     
-'    For i = 1 To MAX_LINE_COUNT
-'        chkValue(i) = ActiveSheet.OLEObjects("CheckBox" & i).Object.Value
-'        If chkValue(i) Then
-'            ' チェックがされている場合
-'            csvStr1 = Range("B" & (i + LINE_OFFSET)).Value
-'            csvStr2 = Range("C" & (i + LINE_OFFSET)).Value
-'            csvStr3 = Range("D" & (i + LINE_OFFSET)).Value
-'            csvStr4 = Range("E" & (i + LINE_OFFSET)).Value
-'            ' データの存在確認
-'            If (Len(csvStr1) = 0 And Len(csvStr2) = 0 And Len(csvStr3) = 0 And Len(csvStr4) = 0) Then
-'                ' 空データの行は、チェックされていても無視する
-'            Else
-'                ' QRコード用文字列
-'                csvQrStr = Chr(34) & _
-'                           csvStr1 & "," & _
-'                           csvStr2 & "," & _
-'                           csvStr3 & "," & _
-'                           csvStr4 & _
-'                           Chr(34)
-'
-'                ' 統合
-'                csvStrAll = strCompanyName & "," & _
-'                            csvStr1 & "," & _
-'                            csvStr2 & "," & _
-'                            csvStr3 & "," & _
-'                            csvStr4 & "," & _
-'                            csvQrStr
-'
-'                ' CSVファイル出力
-'                Print #fileNo, csvStrAll
-'            End If
-'        End If
-'    Next i
-    
     Close #fileNo
 
     '-----------------------------------------------------------------------------
@@ -236,13 +209,7 @@ End Sub
 '==============================================================================
 Private Function getPrintJobCount() As String()
 
-'    Dim csvStr1 As String
-'    Dim csvStr2 As String
-'    Dim csvStr3 As String
-'    Dim csvStr4 As String
-'    Dim intPrintJob As Integer ' 印刷JOB数
     Dim i As Integer
-'    Dim chkValue(MAX_LINE_COUNT)
     
     Dim strPrintjob() As String     'CSV書き出し用
     Dim intPrintCol() As Integer    '印刷対象のカラムを格納
@@ -255,11 +222,15 @@ Private Function getPrintJobCount() As String()
     
     Dim j As Integer
     
+    '備品管理台帳
+    Dim WsBihin As Worksheet
+    Set WsBihin = Worksheets(strWsBihin)
+    
     '対象のカラムの検索
     cnt = 0
     ReDim intPrintCol(intMaxCol)
     For i = 4 To intMaxCol
-        If Cells(LINE_OFFSET - 1, i).Value = "○" Then
+        If WsBihin.Cells(LINE_OFFSET - 1, i).Value = "○" Then
             intPrintCol(cnt) = i
             cnt = cnt + 1
         End If
@@ -276,7 +247,7 @@ Private Function getPrintJobCount() As String()
     cnt = 0
     ReDim intPrintRow(MAX_LINE_COUNT)
     For i = 20 To MAX_LINE_COUNT
-        If Cells(i, 3).Value = "○" Then
+        If WsBihin.Cells(i, 3).Value = "○" Then
             intPrintRow(cnt) = i
             cnt = cnt + 1
         End If
@@ -296,43 +267,16 @@ Private Function getPrintJobCount() As String()
         cnt = 0
         For j = 0 To UBound(strPrintjob, 2) Step 2
             'カラム名書き込み
-            strPrintjob(i, j) = Cells(LINE_OFFSET, intPrintCol(cnt)).Value
+            strPrintjob(i, j) = WsBihin.Cells(LINE_OFFSET, intPrintCol(cnt)).Value
             '中身書き込み
-            strPrintjob(i, j + 1) = Cells(intPrintRow(i), intPrintCol(cnt)).Value
+            strPrintjob(i, j + 1) = WsBihin.Cells(intPrintRow(i), intPrintCol(cnt)).Value
             
-            Debug.Print strPrintjob(i, j) & " , " & strPrintjob(i, j + 1)
             cnt = cnt + 1
         Next j
         
-        Debug.Print "-------------"
     Next i
     
-    Debug.Print "========================================================"
-    
     getPrintJobCount = strPrintjob
-    
-        
-'    ' 初期値設定
-'    intPrintJob = 0
-'
-'    For i = 1 To MAX_LINE_COUNT
-'        chkValue(i) = ActiveSheet.OLEObjects("CheckBox" & i).Object.Value
-'        If chkValue(i) Then
-'            ' チェックがされている場合
-'            csvStr1 = Range("B" & (i + LINE_OFFSET)).Value
-'            csvStr2 = Range("C" & (i + LINE_OFFSET)).Value
-'            csvStr3 = Range("D" & (i + LINE_OFFSET)).Value
-'            csvStr4 = Range("E" & (i + LINE_OFFSET)).Value
-'            ' データの存在確認
-'            If (Len(csvStr1) = 0 And Len(csvStr2) = 0 And Len(csvStr3) = 0 And Len(csvStr4) = 0) Then
-'                ' 空データの行は、チェックされていても無視する
-'            Else
-'                intPrintJob = intPrintJob + 1
-'            End If
-'        End If
-'    Next i
-    
-'    getPrintJobCount = intPrintJob
     
 End Function
 
