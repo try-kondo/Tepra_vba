@@ -1,7 +1,4 @@
 
-' モジュール名の指定
-Attribute VB_Name =  "modList"
-
 
 Function GetDirFile(strFolderPath As String, Optional strExt As String = "") As String()
     '第1引数：フォルダパス

@@ -3,10 +3,6 @@
 ' Copyright 2014 KING JIM CO.,LTD.
 '*****************************************************************************
 
-' モジュール名の指定
-Attribute VB_Name =  "modTepra"
-
-
 ' Windows APIの関数を呼び出すVBA関数を定義
 Declare PtrSafe Function GetModuleHandle Lib "kernel32" Alias "GetModuleHandleA" _
                     (ByVal lpModuleName As String) As Long
@@ -26,29 +22,10 @@ Public Const LINE_OFFSET As Integer = 19
 
 ' 対象データの最大行数
 'Public Const MAX_LINE_COUNT As Integer = Range("D19").End(xlDown).Row
-Public MAX_LINE_COUNT As Integer
 
-' オプション有無文字列
-Public const Flg_Yes as String = "する"
-Public const Flg_No as String = "しない"
+ Public MAX_LINE_COUNT As Integer
 
-' シート名
-Public Const strWsBihin As String = "備品管理台帳"
-Public Const strWsAtesaki As String = "封筒宛先作成"
 
-'エラーメッセージの定義
-Public Const ERROR_MESSAGE_NO_PRINT_JOB = "印刷する項目が入力されていない､または印刷チェックマークが入っていないため､ラベルを印刷できません｡"
-Public Const ERROR_MESSAGE_GET_TAPE_WIDTH = "テープ幅が取得できません。"
-Public Const ERROR_MESSAGE_TPE_FILE_NOT_FOUND = "テープ幅に合ったレイアウトが存在しません。"
-Public Const ERROR_MESSAGE_RUN_PRINT = """SPC10.exe""が指定した場所に存在しません。インストール先を確認してください。"
-
-Public Const ERROR_MESSAGE_Job_Nothing = "印刷対象が選択されていません。"
-Public Const ERROR_MESSAGE_Default_Template = "【テンプレート指定】で【指定しない】を選択した場合は、24mmか36mmのテープを本体に入れてください。"
-Public Const ERROR_MESSAGE_Template_Nothing = "指定されたテンプレートが存在しません。"
-Public Const ERROR_MESSAGE_Maisu_Nothing = "行目の【枚数】が指定されていません。"
-Public Const ERROR_MESSAGE_Muki_Nothing = "行目の【向き】が指定されていません。"
-	
-	
 '==============================================================================
 ' OSが64ビット環境かどうかを判別する関数の定義
 '==============================================================================
@@ -249,7 +226,18 @@ End Function
 
 
 Private sub ErrorConst()
+	'エラーメッセージの定義
+	Public Const ERROR_MESSAGE_NO_PRINT_JOB = "印刷する項目が入力されていない､または印刷チェックマークが入っていないため､ラベルを印刷できません｡"
+	Public Const ERROR_MESSAGE_GET_TAPE_WIDTH = "テープ幅が取得できません。"
+	Public Const ERROR_MESSAGE_TPE_FILE_NOT_FOUND = "テープ幅に合ったレイアウトが存在しません。"
+	Public Const ERROR_MESSAGE_RUN_PRINT = """SPC10.exe""が指定した場所に存在しません。インストール先を確認してください。"
 
+	Public Const ERROR_MESSAGE_Job_Nothing = "印刷対象が選択されていません。"
+	Public Const ERROR_MESSAGE_Default_Template = "【テンプレート指定】で【指定しない】を選択した場合は、24mmか36mmのテープを本体に入れてください。"
+	Public Const ERROR_MESSAGE_Template_Nothing = "指定されたテンプレートが存在しません。"
+	Public Const ERROR_MESSAGE_Maisu_Nothing = "行目の【枚数】が指定されていません。"
+	Public Const ERROR_MESSAGE_Muki_Nothing = "行目の【向き】が指定されていません。"
+	
 	
 end sub
 
